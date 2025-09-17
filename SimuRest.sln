@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimuRest.Core", "SimuRest.Core\SimuRest.Core.csproj", "{57F5D9C7-777F-4754-9563-B8A1BAB2AA92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57F5D9C7-777F-4754-9563-B8A1BAB2AA92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57F5D9C7-777F-4754-9563-B8A1BAB2AA92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57F5D9C7-777F-4754-9563-B8A1BAB2AA92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57F5D9C7-777F-4754-9563-B8A1BAB2AA92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
