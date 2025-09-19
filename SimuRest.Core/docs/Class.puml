@@ -1,0 +1,52 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class Request
+
+class RequestHandler
+
+class Response
+
+class SimuServer {
+    - SimuServer : _server
+    - RequestHandler: _handler
+    - RouteHandler : _router
+    + SimuServer(RequestHandler : handler, RouteHandler : router)
+}
+
+class SimuServerBuilder {
+    + Setup(HttpMethod : method, string : path) : RouteRuleBuilder
+}
+
+class RouteRuleBuilder {
+    - SimuServerBuilder : _serverBuilder
+    - RouteRule : _routeRule
+    
+    + Responds(func<Request, Response> func) : SimuServerBuilder
+}
+
+class RouteHandler {
+    + List<RouteRule> Routes  
+}
+
+class Route {
+    + HttpMethod : method
+    + string : path
+}
+
+class RouteRule {
+    + Route : Route
+    + func<Request, Response> Handler
+}
+
+RouteRuleBuilder *-- RouteRule
+RouteRuleBuilder *--SimuServerBuilder
+RouteRule *-- Route
+RouteHandler o-- RouteRule
+SimuServer *-- RequestHandler
+SimuServer *-- RouteHandler
+SimuServerBuilder *-- SimuServer
+
+
+
+@enduml
