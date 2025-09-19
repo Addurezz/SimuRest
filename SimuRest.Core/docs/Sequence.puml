@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+== Initialization ==
+User -> SimuServer : creates SimuServer
+User -> SimuServer : .Setup(HttpMethod.Get, "/foo")
+SimuServer -> SimuServerBuilder : SetupBuilder(HttpMethod.Get, "/foo")
+SimuServerBuilder -> RouteRuleBuilder : creates RouteRuleBuilder
+RouteRuleBuilder -> RouteRule : creates new RouteRule
+
+== Setup ==
+User -> RouteRuleBuilder : .Responds(req => Response.Timeout)
+RouteRuleBuilder -> RouteRule : creates new RouteRule
+RouteRule -> Route : creates new Route(HttpMethod.Get, "/foo")
+Route --> RouteRule : saves Route
+RouteRule --> RouteRuleBuilder : saves RouteRule
+
+== Finalisation == 
+
+User -> RouteRuleBuilder : .End()
+RouteRuleBuilder --> SimuServerBuilder : returns SimuServerBuilder
+SimuServerBuilder -> SimuServer : passes RouteRule
+SimuServer -> RouteHandler : Add(RouteRule)
+
+== Server-Object-Retrieval ==
+
+User -> SimuServerBuilder : calls .Server
+SimuServerBuilder --> User : returns SimuServer object
+
+@enduml
