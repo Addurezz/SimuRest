@@ -8,12 +8,15 @@ package "Runtime" {
         - SimuServer : _server
         - RequestHandler: _handler
         - RouteHandler : _router
+        - HttpListener : _listener
+        
         + SimuServer(RequestHandler : handler, RouteHandler : router)
-        + Setup(HttpMethod : method, string : path) : SimuServerBuilder
+        
     }
     
     class RouteHandler {
         + List<RouteRule> Routes  
+        + Handle(SimuRequest request) : SimuResponse
     }
     
     class Route {
@@ -35,7 +38,7 @@ package "Runtime" {
     }
     
     class RequestHandler {
-        + Handle(HttpListenerContext context) : SimuResponse
+        + Handle(RouteHandler : router, HttpListenerContext context) : SimuResponse
     }
     
     class SimuResponse {
@@ -49,7 +52,7 @@ package "Runtime" {
 package "Builder API" {
     class SimuServerBuilder {
         + SimuServer : Server
-        + SetupBuilder(HttpMethod : method, string path) : RouteRuleBuilder
+        + Setup(HttpMethod : method, string path) : RouteRuleBuilder
     }
     
     class RouteRuleBuilder {
