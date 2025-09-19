@@ -17,21 +17,33 @@ package "Runtime" {
     }
     
     class Route {
-        + HttpMethod : method
-        + string : path
+        + HttpMethod : Method
+        + string : Path
+        
+        + Route(HttpMethod : method, string : path)
     }
     
     class RouteRule {
         + Route : Route
-        + func<Request, Response> Handler
+        + func<SimuRequest, SimuResponse> Handler
     }
     
     
-    class Request
+    class SimuRequest {
+        + string : Path
+        + HttpMethod : Method
+    }
     
-    class RequestHandler
+    class RequestHandler {
+        + Handle(HttpListenerContext context) : SimuResponse
+    }
     
-    class Response
+    class SimuResponse {
+        + int : StatusCode
+        + string : Body
+        
+        + SimuResponse(int : status, string : body)
+    }
 }
 
 package "Builder API" {

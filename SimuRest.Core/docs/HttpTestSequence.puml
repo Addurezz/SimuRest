@@ -1,0 +1,14 @@
+@startuml
+autonumber
+
+== Request Flow ==
+User -> SimuServer : eingehender HttpListenerContext
+SimuServer -> RequestHandler : Handle(context)
+RequestHandler -> SimuRequest : erstellt SimuRequest aus Context
+RequestHandler -> RouteHandler : FindMatching(SimuRequest)
+RouteHandler --> RequestHandler : gibt passende RouteRule zurück
+RequestHandler -> RouteRule.Handler : Handler(SimuRequest)
+RouteRule.Handler --> SimuResponse : gibt fertige Response zurück
+RequestHandler -> HttpListenerResponse : schreibt SimuResponse zurück
+
+@enduml
