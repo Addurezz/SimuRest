@@ -7,8 +7,24 @@ public class SimuResponse
 
     public SimuResponse(int status, string body)
     {
-        if (String.IsNullOrWhiteSpace(body)) throw new ArgumentException("Body cannot be null", nameof(body));
         StatusCode = status;
         Body = body;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj.GetType() == this.GetType()) return this.Equals((SimuResponse)obj);
+
+        return base.Equals(obj);
+    }
+
+    protected bool Equals(SimuResponse other)
+    {
+        return StatusCode == other.StatusCode && Body == other.Body;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(StatusCode, Body);
     }
 }
