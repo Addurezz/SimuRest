@@ -13,4 +13,21 @@ public class SimuRequest
         Path = path;
         Method = method;
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj.GetType() == this.GetType()) return this.Equals((SimuRequest)obj);
+        
+        return base.Equals(obj);
+    }
+
+    protected bool Equals(SimuRequest other)
+    {
+        return Path == other.Path && Method.Equals(other.Method);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Path, Method);
+    }
 }
