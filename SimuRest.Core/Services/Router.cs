@@ -3,7 +3,7 @@ using SimuRest.Core.Models;
 
 namespace SimuRest.Core.Services;
 
-public class RouteHandler
+public class Router
 {
     public RouteTable Table { get; set; } = new();
 
@@ -15,7 +15,7 @@ public class RouteHandler
         {
             RouteRule rule = Table.Match(request);
 
-            return rule.Handler(request);
+            return rule.Execute(request);
         }
 
         catch (KeyNotFoundException e)

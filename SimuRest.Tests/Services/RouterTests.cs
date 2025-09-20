@@ -2,12 +2,12 @@ using SimuRest.Core.Models;
 using SimuRest.Core.Services;
 namespace SimuRest.Tests.Services;
 
-public class RouteHandlerTests
+public class RouterTests
 {
     [Fact]
     public void Handle_RequestIsNull_ThrowsArgumentException()
     {
-        var handler = new RouteHandler();
+        var handler = new Router();
         Assert.Throws<ArgumentException>(() => handler.Handle(null));
     }
 
@@ -17,7 +17,7 @@ public class RouteHandlerTests
         var request = new SimuRequest(HttpMethod.Get, "/foo");
         var response = new SimuResponse(200, "ok");
         var routeRule = new RouteRule(new Route(HttpMethod.Get, "/foo"), req => new SimuResponse(200, "ok"));
-        var handler = new RouteHandler();
+        var handler = new Router();
         handler.Table.Insert(routeRule);
         
         Assert.Equal(response, handler.Handle(request));
@@ -29,7 +29,7 @@ public class RouteHandlerTests
         var request = new SimuRequest(HttpMethod.Get, "/foo");
         var response = new SimuResponse(404, "");
         var routeRule = new RouteRule(new Route(HttpMethod.Get, "/foo"), req => new SimuResponse(404, ""));
-        var handler = new RouteHandler();
+        var handler = new Router();
         handler.Table.Insert(routeRule);
         
         Assert.Equal(response, handler.Handle(request));

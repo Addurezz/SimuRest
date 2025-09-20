@@ -7,16 +7,24 @@ package "Runtime" {
     class SimuServer {
         - SimuServer : _server
         - RequestHandler: _handler
-        - RouteHandler : _router
+        - Router : _router
+        - ResponseWriter : _writer
         - HttpListener : _listener
         
-        + SimuServer(RequestHandler : handler, RouteHandler : router)
-        
+        + SimuServer(RequestHandler : handler, Router : router)
+        + AddRouteRule(RouteRule routeRule) : void
     }
     
-    class RouteHandler {
-        + List<RouteRule> Routes  
-        + Handle(SimuRequest request) : SimuResponse
+    class Router {
+        + RouteTable : Table
+    
+        + Handle(SimuRequest : request) : SimuResponse
+    }
+    
+    class RouteTable {
+        + List<RouteRule> Routes
+        
+        + Match(SimuRequest : request) : RouteRule
     }
     
     class Route {
@@ -38,7 +46,16 @@ package "Runtime" {
     }
     
     class RequestHandler {
-        + Handle(RouteHandler : router, HttpListenerContext context) : SimuResponse
+        - Router : _router
+        - ResponseWriter : _writer
+    
+        + Handle(HttpListenerContext context) : void
+        + Parse(HttpListenerContext ctx) : SimuRequest
+        + ProcessRequest(SimuRequest : request) : SimuResponse
+    }
+    
+    class ResponseWriter {
+        + Write(HttpListenerContext : ctx, SimuResponse response) : void
     }
     
     class SimuResponse {
@@ -70,9 +87,14 @@ RouteRuleBuilder *-- SimuServerBuilder
 RouteRuleBuilder *-- RouteRule
 RouteRule *-- Route
 
-SimuServer *-- RequestHandler
-SimuServer *-- RouteHandler
+RequestHandler *-- Router
+Router *-- RouteTable
+RequestHandler *-- ResponseWriter
 
-RouteHandler o-- RouteRule
+SimuServer *-- RequestHandler
+SimuServer *-- Router
+
+RouteTable o-- RouteRule
+
 
 @enduml

@@ -12,5 +12,11 @@ public class RouteRule
         
         Route = route;
         Handler = handler;
+        
+    }
+    
+    public SimuResponse Execute(SimuRequest req)
+    {
+        return Handler(req);
     }
 }
