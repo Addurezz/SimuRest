@@ -5,7 +5,7 @@ namespace SimuRest.Core.Services;
 
 public class RouteHandler
 {
-    public List<RouteRule> Routes { get; set; } = new();
+    public RouteTable Table { get; set; } = new();
 
     public SimuResponse Handle(SimuRequest request)
     {
@@ -13,18 +13,14 @@ public class RouteHandler
         
         try
         {
-            foreach (RouteRule route in Routes)
-            {
-                if (route.Route.Method == request.Method && route.Route.Path == request.Path)
-                    return route.Handler(request);
-            }
+            RouteRule rule = Table.Match(request);
 
-            return new SimuResponse(404, "");
+            return rule.Handler(request);
         }
 
-        catch
+        catch (KeyNotFoundException e)
         {
-            return new SimuResponse(500, "Internal Server Error");
+            return new SimuResponse(404, "Route not found");
         }
     }
 }

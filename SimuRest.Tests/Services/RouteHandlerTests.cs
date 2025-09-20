@@ -18,7 +18,7 @@ public class RouteHandlerTests
         var response = new SimuResponse(200, "ok");
         var routeRule = new RouteRule(new Route(HttpMethod.Get, "/foo"), req => new SimuResponse(200, "ok"));
         var handler = new RouteHandler();
-        handler.Routes.Add(routeRule);
+        handler.Table.Insert(routeRule);
         
         Assert.Equal(response, handler.Handle(request));
     }
@@ -30,7 +30,7 @@ public class RouteHandlerTests
         var response = new SimuResponse(404, "");
         var routeRule = new RouteRule(new Route(HttpMethod.Get, "/foo"), req => new SimuResponse(404, ""));
         var handler = new RouteHandler();
-        handler.Routes.Add(routeRule);
+        handler.Table.Insert(routeRule);
         
         Assert.Equal(response, handler.Handle(request));
     }
