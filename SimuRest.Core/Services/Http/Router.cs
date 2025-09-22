@@ -8,7 +8,7 @@ public class Router
 
     public SimuResponse Handle(SimuRequest? request)
     {
-        if (request is null) return new SimuResponse(400, "Bad request");
+        if (request is null) return SimuResponse.BadRequest;
         
         try
         {
@@ -19,7 +19,7 @@ public class Router
 
         catch (KeyNotFoundException e)
         {
-            return new SimuResponse(404, "Route not found");
+            return SimuResponse.NotFound;
         }
     }
 }
