@@ -5,33 +5,33 @@ namespace SimuRest.Core.Services.Http;
 
 public class Parser
 {
-    public SimuRequest Parse(HttpListenerContext ctx)
+    public SimuRequest? Parse(IHttpContext ctx)
     {
+        if (ctx is null) throw new ArgumentNullException();
+
+        string? path;
+
         try
         {
-            string path = ctx.Request.Url.AbsolutePath;
-            if (String.IsNullOrWhiteSpace(path))
-                path = "/";
-            
-            HttpMethod method;
-            switch (ctx.Request.HttpMethod)
-            {
-                case "GET":
-                    method = HttpMethod.Get;
-                    break;
-                case "POST":
-                    method = HttpMethod.Post;
-                    break;
-                default:
-                    throw new Exception();
-            }
+            path = ctx.Url.AbsolutePath;
+        }
+        catch
+        {
+            path = null;
+            Console.WriteLine("Oops, Something went wrong getting the path.");
+        }
 
-            return new SimuRequest(method, path);
+        if (String.IsNullOrWhiteSpace(path))
+            path = "/";
+
+        try
+        {
+            return new SimuRequest(HttpMethod.Parse(ctx.HttpMethod), path);
         }
 
         catch
         {
-            Console.WriteLine("Oops, Something went wrong here.");
+            Console.WriteLine("Oops, Something went wrong parsing the Http method.");
             return null;
         }
     }

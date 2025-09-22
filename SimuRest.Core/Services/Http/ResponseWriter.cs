@@ -6,7 +6,7 @@ namespace SimuRest.Core.Services.Http;
 
 public class ResponseWriter
 {
-    public void Write(HttpListenerContext ctx, SimuResponse? response)
+    public void Write(IHttpContext ctx, SimuResponse? response)
     {
         if (response is null)
             response = new SimuResponse(404, "Not found");
