@@ -9,8 +9,20 @@ public class SimuServer
     public ResponseWriter Writer;
     public Parser Parser;
     public HttpListener Listener;
-    
-    public int Port { get; set; } = 5000;
+
+    private int _port = 5000;
+
+    public int Port
+    {
+        get => _port;
+        set
+        {
+            if (value is < 1024 or > 49151)
+                throw new ArgumentException("Ports must be be between 1024 and 49151", nameof(value));
+
+            _port = value;
+        }
+    }
 
     public SimuServer(Router router, ResponseWriter writer, Parser parser)
     {
@@ -33,10 +45,9 @@ public class SimuServer
             Handler.Handle(context);
         }
     }
-
+    
     public void Stop()
     {
-        if (Listener == null) return;
         if (!Listener.IsListening) return;
 
         try

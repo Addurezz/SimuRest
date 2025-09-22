@@ -24,4 +24,10 @@ public class SimuServerBuilder
         RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, Path));
         return routeRuleBuilder;
     }
+
+    public SimuServerBuilder Port(int port)
+    {
+        Server.Port = port;
+        return this;
+    }
 }
