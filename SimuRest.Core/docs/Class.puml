@@ -5,14 +5,10 @@ top to bottom direction
 
 package "Runtime" {
     class SimuServer {
-        - SimuServer : _server
         - RequestHandler: _handler
         - Router : _router
         - ResponseWriter : _writer
         - HttpListener : _listener
-        
-        + SimuServer(RequestHandler : handler, Router : router)
-        + AddRouteRule(RouteRule routeRule) : void
     }
     
     class Router {
@@ -48,10 +44,13 @@ package "Runtime" {
     class RequestHandler {
         - Router : _router
         - ResponseWriter : _writer
+        - Parser : _parser
     
         + Handle(HttpListenerContext context) : void
-        + Parse(HttpListenerContext ctx) : SimuRequest
-        + ProcessRequest(SimuRequest : request) : SimuResponse
+    }
+    
+    class Parser {
+        + Parse(HttpListenerContext : context) : SimuRequest
     }
     
     class ResponseWriter {
@@ -90,6 +89,7 @@ RouteRule *-- Route
 RequestHandler *-- Router
 Router *-- RouteTable
 RequestHandler *-- ResponseWriter
+RequestHandler *-- Parser
 
 SimuServer *-- RequestHandler
 SimuServer *-- Router

@@ -2,14 +2,14 @@ using System.Net;
 using System.Text;
 using SimuRest.Core.Models;
 
-namespace SimuRest.Core.Services;
+namespace SimuRest.Core.Services.Http;
 
 public class ResponseWriter
 {
-    public void Write(HttpListenerContext ctx, SimuResponse response)
+    public void Write(HttpListenerContext ctx, SimuResponse? response)
     {
-        if (response is null) return;
-        
+        if (response is null)
+            response = new SimuResponse(404, "Not found");
         int status = response.StatusCode;
         string body = response.Body;
 

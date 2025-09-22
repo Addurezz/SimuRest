@@ -1,7 +1,6 @@
-using System.Reflection.Metadata;
 using SimuRest.Core.Models;
 
-namespace SimuRest.Core.Services;
+namespace SimuRest.Core.Services.Http;
 
 public class Router
 {

@@ -1,7 +1,7 @@
 using System.Net;
 using SimuRest.Core.Models;
 
-namespace SimuRest.Core.Services;
+namespace SimuRest.Core.Services.Http;
 
 public class Parser
 {
@@ -10,6 +10,9 @@ public class Parser
         try
         {
             string path = ctx.Request.Url.AbsolutePath;
+            if (String.IsNullOrWhiteSpace(path))
+                path = "/";
+            
             HttpMethod method;
             switch (ctx.Request.HttpMethod)
             {

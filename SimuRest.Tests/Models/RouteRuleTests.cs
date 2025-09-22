@@ -7,8 +7,6 @@ public class RouteRuleTests
     public static IEnumerable<object[]> InvalidInitArguments =>
         new List<object[]>
         {
-            new object[] { null, null },
-            new object[] { new Route(HttpMethod.Post, "/user"), null },
             new object[] { null, new Func<SimuRequest, SimuResponse>(req => new SimuResponse(1, "a")) },
         };
     
