@@ -20,8 +20,25 @@ public class RequestHandler
 
     public void Handle(HttpListenerContext ctx)
     {
-        SimuRequest req = _parser.Parse(ctx);
-        SimuResponse response = req != null ? _router.Handle(req) : null;
+        HttpContextAdapter adapter = new HttpContextAdapter(ctx);
+        SimuRequest? req = GetSimuRequestFromContext(adapter);
+        SimuResponse response = GetSimuResponseFromRouter(req);
+        
+        WriteToStream(adapter, response);
+    }
+
+    public SimuRequest? GetSimuRequestFromContext(IHttpContext ctx)
+    {
+        return _parser.Parse(ctx);
+    }
+
+    public SimuResponse GetSimuResponseFromRouter(SimuRequest? req)
+    {
+        return _router.Handle(req);
+    }
+
+    public void WriteToStream(IHttpContext ctx, SimuResponse response)
+    {
         _writer.Write(ctx, response);
     }
 }
