@@ -7,13 +7,6 @@ namespace SimuRest.Tests.Services;
 public class ParserTests
 {
     [Fact]
-    public void Parse_ContextIsNull_ThrowsArgumentNullException()
-    {
-        var parser = new Parser();
-        Assert.Throws<ArgumentNullException>(() => parser.Parse(null));
-    }
-
-    [Fact]
     public void Parse_UrlIsNull_GetMethod_ReturnsRequest()
     {
         var parser = new Parser();

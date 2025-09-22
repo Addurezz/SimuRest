@@ -7,8 +7,6 @@ public class Parser
 {
     public SimuRequest? Parse(IHttpContext ctx)
     {
-        if (ctx is null) throw new ArgumentNullException();
-
         string? path;
 
         try

@@ -6,9 +6,9 @@ public class Router
 {
     public RouteTable Table { get; set; } = new();
 
-    public SimuResponse Handle(SimuRequest request)
+    public SimuResponse Handle(SimuRequest? request)
     {
-        if (request is null) throw new ArgumentException("Request cannot be null", nameof(request));
+        if (request is null) return new SimuResponse(400, "Bad request");
         
         try
         {

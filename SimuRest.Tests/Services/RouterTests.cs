@@ -7,14 +7,17 @@ namespace SimuRest.Tests.Services;
 public class RouterTests
 {
     [Fact]
-    public void Handle_RequestIsNull_ThrowsArgumentException()
+    public void Handle_RequestIsNull_ReturnsStatus400()
     {
-        var handler = new Router();
-        Assert.Throws<ArgumentException>(() => handler.Handle(null));
+        var router = new Router();
+        SimuRequest? req = null;
+
+        var desired = new SimuResponse(400, "Bad request");
+        Assert.Equal(desired, router.Handle(req));
     }
 
     [Fact]
-    public void Handle_RequestIsValid_ReturnsResponse()
+    public void Handle_RequestIsValid_ReturnsStatus200()
     {
         var request = new SimuRequest(HttpMethod.Get, "/foo");
         var response = new SimuResponse(200, "ok");
