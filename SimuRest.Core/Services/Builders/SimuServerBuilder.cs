@@ -19,9 +19,9 @@ public class SimuServerBuilder
         Server = new SimuServer(r, w, p);
     }
 
-    public RouteRuleBuilder Setup(HttpMethod method, string Path)
+    public RouteRuleBuilder Setup(HttpMethod method, string path)
     {   
-        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, Path));
+        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path));
         return routeRuleBuilder;
     }
 
