@@ -2,7 +2,7 @@ using Moq;
 using SimuRest.Core.Models;
 using SimuRest.Core.Services.Http;
 
-namespace SimuRest.Tests.Services;
+namespace SimuRest.Tests.Services.Http;
 
 public class ParserTests
 {
