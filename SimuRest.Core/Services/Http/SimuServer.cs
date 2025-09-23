@@ -33,16 +33,34 @@ public class SimuServer
         Listener = new HttpListener();
     }
 
-    public void Start()
-    {   
-        Listener.Prefixes.Add($"http://localhost:{Port}/");
-        Listener.Start();
-        
-        while (Listener.IsListening)
+    public async Task Start()
+    {
+        try
         {
-            HttpListenerContext context = Listener.GetContext(); // blockiert auf Request
-            
-            Handler.Handle(context);
+            Listener.Prefixes.Add($"http://localhost:{Port}/");
+            Listener.Start();
+        
+            while (Listener.IsListening)
+            {
+                HttpListenerContext context = await Listener.GetContextAsync(); // blockiert auf Request
+
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Handler.Handle(context);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Oops, Something went wrong with the server.\n" + e);
+            this.Stop();
         }
     }
     

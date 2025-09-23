@@ -18,13 +18,13 @@ public class RequestHandler
         _parser = parser;
     }
 
-    public void Handle(HttpListenerContext ctx)
+    public async Task Handle(HttpListenerContext ctx)
     {
         HttpContextAdapter adapter = new HttpContextAdapter(ctx);
         SimuRequest? req = GetSimuRequestFromContext(adapter);
-        SimuResponse response = GetSimuResponseFromRouter(req);
+        SimuResponse response = await GetSimuResponseFromRouter(req);
         
-        WriteToStream(adapter, response);
+        await WriteToStream(adapter, response);
     }
 
     public SimuRequest? GetSimuRequestFromContext(IHttpContext ctx)
@@ -32,13 +32,13 @@ public class RequestHandler
         return _parser.Parse(ctx);
     }
 
-    public SimuResponse GetSimuResponseFromRouter(SimuRequest? req)
+    public async Task<SimuResponse> GetSimuResponseFromRouter(SimuRequest? req)
     {
-        return _router.Handle(req);
+        return await _router.Handle(req);
     }
 
-    public void WriteToStream(IHttpContext ctx, SimuResponse response)
+    public async Task WriteToStream(IHttpContext ctx, SimuResponse response)
     {
-        _writer.Write(ctx, response);
+        await _writer.Write(ctx, response);
     }
 }

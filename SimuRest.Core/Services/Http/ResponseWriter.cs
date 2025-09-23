@@ -6,7 +6,7 @@ namespace SimuRest.Core.Services.Http;
 
 public class ResponseWriter
 {
-    public void Write(IHttpContext ctx, SimuResponse? response)
+    public async Task Write(IHttpContext ctx, SimuResponse? response)
     {
         if (response is null)
             response = new SimuResponse(404, "Not found");
@@ -18,7 +18,7 @@ public class ResponseWriter
 
         ctx.Response.ContentType = "text/plain";
         ctx.Response.ContentLength64 = buffer.Length;
-        ctx.Response.OutputStream.Write(buffer,0,buffer.Length);
+        await ctx.Response.OutputStream.WriteAsync(buffer,0,buffer.Length);
         ctx.Response.OutputStream.Close();
     }
 }

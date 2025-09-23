@@ -4,6 +4,7 @@ public class RouteRule
 {
     public Route Route { get; set; }
     public Func<SimuRequest, SimuResponse>? Handler { get; set; }
+    public int Delay { get; }
 
     public RouteRule(Route route, Func<SimuRequest, SimuResponse>? handler)
     {
@@ -14,9 +15,10 @@ public class RouteRule
         
     }
     
-    public SimuResponse Execute(SimuRequest req)
+    public async Task<SimuResponse> Execute(SimuRequest req)
     {
         if (Handler is null) return new SimuResponse(404, "Missing response");
+        await Task.Delay(Delay);
         return Handler(req);
     }
 }

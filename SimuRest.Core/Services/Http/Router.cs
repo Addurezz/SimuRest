@@ -6,7 +6,7 @@ public class Router
 {
     public RouteTable Table { get; set; } = new();
 
-    public SimuResponse Handle(SimuRequest? request)
+    public async Task<SimuResponse> Handle(SimuRequest? request)
     {
         if (request is null) return SimuResponse.BadRequest;
         
@@ -14,7 +14,7 @@ public class Router
         {
             RouteRule rule = Table.Match(request);
 
-            return rule.Execute(request);
+            return await rule.Execute(request);
         }
 
         catch (KeyNotFoundException e)
