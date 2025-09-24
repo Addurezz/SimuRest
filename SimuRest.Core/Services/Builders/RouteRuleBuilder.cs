@@ -4,9 +4,9 @@ namespace SimuRest.Core.Services.Builders;
 
 public class RouteRuleBuilder
 {
-    private SimuServerBuilder _serverBuilder;
-    private RouteRule? _rule;
-    private RouteTable _routeTable;
+    private readonly SimuServerBuilder _serverBuilder;
+    private readonly RouteRule? _rule;
+    private readonly RouteTable _routeTable;
 
     public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route)
     {
@@ -19,6 +19,14 @@ public class RouteRuleBuilder
     {
         if (_rule is null) throw new ApplicationException();
         _rule.Handler = handler;
+        return this;
+    }
+
+    public RouteRuleBuilder Delay(int ms)
+    {
+        if (ms > 0)
+            _rule!.Delay = ms;
+
         return this;
     }
 

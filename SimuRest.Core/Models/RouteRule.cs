@@ -4,7 +4,7 @@ public class RouteRule
 {
     public Route Route { get; set; }
     public Func<SimuRequest, SimuResponse>? Handler { get; set; }
-    public int Delay { get; }
+    public int Delay { get; set; }
 
     public RouteRule(Route route, Func<SimuRequest, SimuResponse>? handler)
     {
