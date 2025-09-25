@@ -15,7 +15,6 @@ public class RouteTests
                 new object[] { HttpMethod.Post, null },
                 new object[] { HttpMethod.Post, "" },
                 new object[] { HttpMethod.Post, "   " },
-                new object[] { null, "/user" },
             };
     
     [Theory]

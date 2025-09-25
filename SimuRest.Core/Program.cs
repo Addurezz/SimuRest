@@ -7,11 +7,20 @@ using SimuRest.Core.Services.Http;
 
 
 var builder = new SimuServerBuilder()
+    .Port(5000)
     .Setup(HttpMethod.Get, "/foo")
     .Responds(req => new SimuResponse(200, "test success"))
-    .End();
-    
-SimuServer server = builder.Server;
-var serverTask = Task.Run(() => server.Start());
-Console.ReadLine();
-server.Stop();
+    .Delay(0)
+    .Apply();
+
+
+var server = builder.Server;
+var serverTask = server.Start();
+
+// optional: testen
+using var client = new HttpClient();
+var response = await client.GetAsync("http://localhost:5000/foo");
+Console.WriteLine(await response.Content.ReadAsStringAsync());
+
+// Stop server
+await server.Stop();

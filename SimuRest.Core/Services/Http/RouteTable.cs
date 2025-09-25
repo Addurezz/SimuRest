@@ -1,13 +1,26 @@
 using SimuRest.Core.Models;
-namespace SimuRest.Core.Services;
+namespace SimuRest.Core.Services.Http;
 
+/// <summary>
+/// Provides In-Memory storage for paths and their <see cref="RouteRule"/>.
+/// </summary>
 public class RouteTable
 {
+    /// <summary>
+    /// Stores the <see cref="RouteRule"/> with (<see cref="HttpMethod"/>, <see cref="String"/>) as key.
+    /// </summary>
     public Dictionary<(HttpMethod, string), RouteRule> Routes { get; set; } = new();
 
-    public RouteRule Match(SimuRequest req)
+    
+    /// <summary>
+    /// Matches the specified <see cref="SimuRequest"/> to existing keys in <see cref="Routes"/>.
+    /// </summary>
+    /// <param name="request">The <paramref name="request"/> to get the <see cref="Route"/> from. </param>
+    /// <returns>A <see cref="RouteRule"/> of the matching <see cref="Route"/>. </returns>
+    /// <exception cref="KeyNotFoundException">Throws if <see cref="Routes"/> does not contain specified key.</exception>
+    public RouteRule Match(SimuRequest request)
     {
-        (HttpMethod, string) key = (req.Method, req.Path);
+        (HttpMethod, string) key = (request.Method, request.Path);
 
         RouteRule? rule;
 
@@ -15,7 +28,12 @@ public class RouteTable
 
         return rule;
     }
-
+    
+    /// <summary>
+    /// Inserts a <see cref="RouteRule"/> into <see cref="Routes"/>.
+    /// </summary>
+    /// <param name="rule">The <see cref="RouteRule"/> to insert.</param>
+    /// <exception cref="ArgumentNullException">Throws if <paramref name="rule"/> is null.</exception>
     public void Insert(RouteRule? rule)
     {
         if (rule is null) throw new ArgumentNullException();

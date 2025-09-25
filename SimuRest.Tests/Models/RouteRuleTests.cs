@@ -14,6 +14,6 @@ public class RouteRuleTests
     [MemberData(nameof(InvalidInitArguments))]
     public void Init_RouteOrHandlerIsNull_ThrowsArgumentException(Route route, Func<SimuRequest, SimuResponse> func)
     {
-        Assert.Throws<ArgumentException>(() => new RouteRule(route, func));
+        Assert.Throws<ArgumentNullException>(() => new RouteRule(route, func));
     }
 }

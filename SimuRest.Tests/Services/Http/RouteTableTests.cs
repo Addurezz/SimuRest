@@ -1,5 +1,6 @@
 using SimuRest.Core.Models;
 using SimuRest.Core.Services;
+using SimuRest.Core.Services.Http;
 
 namespace SimuRest.Tests.Services.Http;
 

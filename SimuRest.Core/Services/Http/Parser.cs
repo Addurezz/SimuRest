@@ -3,8 +3,16 @@ using SimuRest.Core.Models;
 
 namespace SimuRest.Core.Services.Http;
 
+/// <summary>
+/// Translates a <see cref="HttpListenerContext"/>.
+/// </summary>
 public class Parser
 {
+    /// <summary>
+    /// Parses the specified <see cref="IHttpContext"/> into a <see cref="SimuRequest"/>.
+    /// </summary>
+    /// <param name="ctx">The <see cref="IHttpContext"/> to parse.</param>
+    /// <returns>The <see cref="SimuRequest"/>.</returns>
     public SimuRequest? Parse(IHttpContext ctx)
     {
         string? path;
