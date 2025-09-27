@@ -1,82 +1,103 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-top to bottom direction
 
 package "Runtime" {
     class SimuServer {
-        - RequestHandler: _handler
-        - Router : _router
-        - ResponseWriter : _writer
-        - HttpListener : _listener
+        - _memory: ServerMemory
+        - _handler: RequestHandler
+        - _router: Router
+        - _writer: ResponseWriter
+        - _listener: HttpListener
+        
+        + SimuServer(m : ServerMemory, h : RequestHandler, r : Router, w : ResponseWriter)
+        + Handle(ctx : HttpListenerContext) : void
+    }
+    
+    class SimuRequest {
+        + Path: string
+        + Method: HttpMethod
+    }
+    class SimuResponse {
+        + StatusCode: int
+        + Body: string
+        + BadRequest: SimuResponse <<static>> 
+        + NotFound: SimuResponse <<static>> 
+        
+        + SimuResponse(status: int, body: string)
     }
     
     class Router {
-        + RouteTable : Table
+        + Table: RouteTable
     
-        + Handle(SimuRequest : request) : SimuResponse
+        + Handle(request: SimuRequest): SimuResponse
     }
     
     class RouteTable {
-        + List<RouteRule> Routes
+        + Routes: List<RouteRule>
         
-        + Match(SimuRequest : request) : RouteRule
+        + Match(request: SimuRequest): RouteRule
     }
     
     class Route {
-        + HttpMethod : Method
-        + string : Path
+        + Method: HttpMethod
+        + Path: string
         
-        + Route(HttpMethod : method, string : path)
+        + Route(method: HttpMethod, path: string)
     }
     
     class RouteRule {
-        + Route : Route
-        + func<SimuRequest, SimuResponse> Handler
+        + Route: Route
+        + Handler: func<SimuRequest, SimuResponse>
     }
     
-    
-    class SimuRequest {
-        + string : Path
-        + HttpMethod : Method
-    }
     
     class RequestHandler {
-        - Router : _router
-        - ResponseWriter : _writer
-        - Parser : _parser
+        - _router: Router
+        - _writer: ResponseWriter
+        - _parser: Parser
     
-        + Handle(HttpListenerContext context) : void
-    }
-    
-    class Parser {
-        + Parse(HttpListenerContext : context) : SimuRequest
+        + Handle(context: HttpListenerContext): void
+        + GetSimuRequest(ctx : IHttpContext) : SimuRequest
+        + GetSimuResponseFromRouter(req : SimuRequest) : SimuResponse
+        + WriteToStream(ctx : IHttpContext, resp SimuResponse) : void
     }
     
     class ResponseWriter {
-        + Write(HttpListenerContext : ctx, SimuResponse response) : void
+        + Write(ctx: IHttpContext, response: SimuResponse): void
+    }
+    class Parser {
+        + Parse(context: IHttpContext): SimuRequest
     }
     
-    class SimuResponse {
-        + int : StatusCode
-        + string : Body
-        
-        + SimuResponse(int : status, string : body)
+    
+    
+    interface IHttpContext {
+        + Url: Uri
+        + Method: string
     }
+    
+    class ServerMemory {
+        - _memory : Dictionary<String, object?> 
+        
+        + Save(key : string, data : object?) : void
+        + Get(key : string) : object? 
+    }
+   
 }
 
 package "Builder API" {
     class SimuServerBuilder {
-        + SimuServer : Server
-        + Setup(HttpMethod : method, string path) : RouteRuleBuilder
+        + Server: SimuServer
+        + Setup(method: HttpMethod, path: string): RouteRuleBuilder
     }
     
     class RouteRuleBuilder {
-        - SimuServerBuilder : _serverBuilder
-        - RouteRule : _routeRule
+        - _serverBuilder: SimuServerBuilder
+        - _routeRule: RouteRule
         
-        + Responds(func<Request, Response> func) : RouteRuleBuilder
-        + End() : SimuServerBuilder
+        + Responds(func: func<SimuRequest, SimuResponse>): RouteRuleBuilder
+        + End(): SimuServerBuilder
     }
 }
 
@@ -90,11 +111,16 @@ RequestHandler *-- Router
 Router *-- RouteTable
 RequestHandler *-- ResponseWriter
 RequestHandler *-- Parser
+RequestHandler --> IHttpContext : uses
+RequestHandler ..> SimuRequest
+RequestHandler ..> SimuResponse
+
+Parser --> IHttpContext : uses
+ResponseWriter --> IHttpContext : uses
 
 SimuServer *-- RequestHandler
 SimuServer *-- Router
 
 RouteTable o-- RouteRule
-
 
 @enduml
