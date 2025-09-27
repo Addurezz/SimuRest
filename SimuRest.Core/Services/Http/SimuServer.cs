@@ -1,5 +1,7 @@
 using System.Net;
 using SimuRest.Core.Models;
+using SimuRest.Core.Services.Perseverance;
+
 namespace SimuRest.Core.Services.Http;
 
 
@@ -32,6 +34,8 @@ public class SimuServer
     /// Gets the <see cref="HttpListener"/>.
     /// </summary>
     public HttpListener Listener;
+
+    public ServerMemory Memory { get; }
     
     // the lock for editing '_activeRequests' in multi-threading
     private readonly object _tasksLock = new();
@@ -66,13 +70,15 @@ public class SimuServer
     /// </summary>
     /// <param name="router">The <see cref="Router"/> that matches with <see cref="RouteTable"/> for <see cref="SimuRequest"/>.</param>
     /// <param name="writer">The <see cref="ResponseWriter"/> that writes a specified file stream to the <see cref="HttpListenerResponse"/>.</param>
-    /// <param name="parser">The <see cref="Parser"/> that that translates incoming requests into <see cref="SimuRequest"/>.</param>
-    public SimuServer(Router router, ResponseWriter writer, Parser parser)
+    /// <param name="parser">The <see cref="Parser"/> that translates incoming requests into <see cref="SimuRequest"/>.</param>
+    /// <param name="memory">The <see cref="ServerMemory"/> that allows in memory saving and retrieval.</param>
+    public SimuServer(Router router, ResponseWriter writer, Parser parser, ServerMemory memory)
     {
         Parser = parser;
         Router = router;
         Writer = writer;
-        Handler = new RequestHandler(Router, Parser, Writer);
+        Memory = memory;
+        Handler = new RequestHandler(Router, Parser, Writer, Memory);
         Listener = new HttpListener();
     }
 

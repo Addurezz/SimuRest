@@ -32,7 +32,7 @@ public class Parser
 
         try
         {
-            return new SimuRequest(HttpMethod.Parse(ctx.HttpMethod), path);
+            return new SimuRequest(HttpMethod.Parse(ctx.HttpMethod), path, ctx.Body);
         }
 
         catch

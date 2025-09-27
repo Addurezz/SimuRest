@@ -26,4 +26,9 @@ public interface IHttpContext
     /// Gets the <see cref="HttpMethod"/> from the <see cref="HttpListenerContext"/>.
     /// </summary>
     public string HttpMethod { get; }
+    
+    /// <summary>
+    /// Gets the content from the <see cref="HttpListenerContext"/>.
+    /// </summary>
+    public string Body { get; }
 }

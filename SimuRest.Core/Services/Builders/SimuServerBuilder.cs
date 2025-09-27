@@ -1,5 +1,6 @@
 using SimuRest.Core.Models;
 using SimuRest.Core.Services.Http;
+using SimuRest.Core.Services.Perseverance;
 
 namespace SimuRest.Core.Services.Builders;
 
@@ -12,6 +13,8 @@ public class SimuServerBuilder
     /// Gets or Sets the <see cref="SimuServer"/>.
     /// </summary>
     public SimuServer Server { get; set; }
+    
+    public ServerMemory Memory { get; }
     
     /// <summary>
     /// Initializes a new instance of a <see cref="SimuServerBuilder"/> with a given <see cref="SimuServer"/>.
@@ -27,10 +30,12 @@ public class SimuServerBuilder
     /// </summary>
     public SimuServerBuilder()
     {
+        ServerMemory m = new ServerMemory();
+        Memory = m;
         Router r = new Router();
         ResponseWriter w = new ResponseWriter();
         Parser p = new Parser();
-        Server = new SimuServer(r, w, p);
+        Server = new SimuServer(r, w, p, m);
     }
 
     /// <summary>
@@ -41,7 +46,7 @@ public class SimuServerBuilder
     /// <returns>A <see cref="RouteRuleBuilder"/> to setup the <see cref="RouteRule"/>.</returns>
     public RouteRuleBuilder Setup(HttpMethod method, string path)
     {   
-        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path));
+        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path), Memory);
         return routeRuleBuilder;
     }
 

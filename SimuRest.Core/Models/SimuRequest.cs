@@ -15,21 +15,25 @@ public class SimuRequest
     /// Gets the <see cref="HttpMethod"/> of the <see cref="SimuRequest"/>.
     /// </summary>
     public HttpMethod Method { get; }
+    
+    public string Body { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SimuRequest"/>
     /// </summary>
     /// <param name="method">The <see cref="HttpMethod"/> of the <see cref="SimuRequest"/>.</param>
     /// <param name="path">The <paramref name="path"/> of the <see cref="SimuRequest"/>.</param>
+    /// <param name="body">The <paramref name="body"/> of the <see cref="SimuRequest"/>.</param>
     /// <exception cref="ArgumentException">Throws if <paramref name="path"/> is null or empty.</exception>
     /// <exception cref="ArgumentNullException">Throws if <paramref name="method"/> is null.</exception>
-    public SimuRequest(HttpMethod method, string path)
+    public SimuRequest(HttpMethod method, string path, string body = "")
     {
         if (String.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path cannot be null or empty.", nameof(path));
         if (method is null) throw new ArgumentNullException();
         
         Path = path;
         Method = method;
+        Body = body;
     }
 
     public override bool Equals(object? obj)

@@ -1,5 +1,6 @@
 using System.Net;
 using SimuRest.Core.Models;
+using SimuRest.Core.Services.Perseverance;
 
 namespace SimuRest.Core.Services.Http;
 
@@ -14,14 +15,17 @@ public class RequestHandler
     
     private readonly Parser _parser;
 
+    private readonly ServerMemory _memory;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="RequestHandler"/>.
     /// </summary>
     /// <param name="router">The <see cref="Router"/> to match routes.</param>
     /// <param name="parser">the <see cref="Parser"/> to parse <see cref="SimuRequest"/>.</param>
     /// <param name="writer">The <see cref="ResponseWriter"/> to write to the response file stream.</param>
-    public RequestHandler(Router router, Parser parser, ResponseWriter writer)
+    public RequestHandler(Router router, Parser parser, ResponseWriter writer, ServerMemory memory)
     {
+        _memory = memory;
         _writer = writer;
         _router = router;
         _parser = parser;
@@ -35,7 +39,7 @@ public class RequestHandler
     {
         HttpContextAdapter adapter = new HttpContextAdapter(ctx);
         SimuRequest? req = GetSimuRequestFromContext(adapter);
-        SimuResponse response = await GetSimuResponseFromRouter(req);
+        SimuResponse response = await GetSimuResponse(req);
         
         await WriteToStream(adapter, response);
     }
@@ -55,9 +59,24 @@ public class RequestHandler
     /// </summary>
     /// <param name="req">The <see cref="SimuRequest"/>.</param>
     /// <returns>The final <see cref="SimuResponse"/>.</returns>
-    public async Task<SimuResponse> GetSimuResponseFromRouter(SimuRequest? req)
+    /// <exception cref="ArgumentNullException">Throws of <param name="req"> is null.</param></exception>
+    public async Task<SimuResponse> GetSimuResponse(SimuRequest? req)
     {
-        return await _router.Handle(req);
+        if (req is null) throw new ArgumentNullException();
+        
+        // check if custom response was set up
+        SimuResponse response = await _router.Handle(req);
+        
+        // if no custom response was found, check if the memory has a response 
+        if (response.Equals(SimuResponse.NotFound))
+        {
+            var data = _memory.Get(req.Path);
+            
+            if (data is string s)
+                response = new SimuResponse(200, s);
+        }
+
+        return response;
     }
 
     /// <summary>

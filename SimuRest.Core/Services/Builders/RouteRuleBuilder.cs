@@ -1,5 +1,6 @@
 using SimuRest.Core.Models;
 using SimuRest.Core.Services.Http;
+using SimuRest.Core.Services.Perseverance;
 
 namespace SimuRest.Core.Services.Builders;
 
@@ -11,14 +12,16 @@ public class RouteRuleBuilder
     private readonly SimuServerBuilder _serverBuilder;
     private readonly RouteRule? _rule;
     private readonly RouteTable _routeTable;
+    private readonly ServerMemory _memory;
 
     /// <summary>
     /// Initializes a new instance of a <see cref="RouteRuleBuilder"/>.
     /// </summary>
     /// <param name="serverBuilder">The <see cref="SimuServerBuilder"/> that requested the <see cref="RouteRuleBuilder"/>.</param>
     /// <param name="route">The <see cref="Route"/> to build the <see cref="RouteRule"/> from.</param>
-    public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route)
+    public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route, ServerMemory memory)
     {
+        _memory = memory;
         _serverBuilder = serverBuilder;
         _routeTable = serverBuilder.Server.Router.Table;
         _rule = new RouteRule(route, null);
@@ -52,6 +55,40 @@ public class RouteRuleBuilder
         return this;
     }
 
+    /// <summary>
+    /// Configures the current <see cref="RouteRule"/> to store an incoming POST request body in memory.
+    /// </summary>
+    /// <returns>The <see cref="RouteRuleBuilder"/>.</returns>
+    /// <exception cref="InvalidOperationException">Throws if the <see cref="RouteRule"/> to configure is null or is not a POST request.</exception>
+    public RouteRuleBuilder SaveInMemory()
+    {
+        if (_rule is null || _rule.Route.Method != HttpMethod.Post) throw new InvalidOperationException();
+
+        _rule.Handler = req =>
+        {
+            _memory.Save(req.Path, req.Body);
+            return new SimuResponse(200, "Saved");
+        };
+
+        return this;
+    }
+
+    public RouteRuleBuilder RespondFromMemory()
+    {
+        if (_rule is null) throw new InvalidOperationException();
+
+        _rule.Handler = req =>
+        {
+            var data = _memory.Get(req.Path);
+            if (data is string s)
+                return new SimuResponse(200, s);
+
+            return SimuResponse.NotFound;
+        };
+ 
+        return this;
+    }
+    
     /// <summary>
     /// Finalizes the <see cref="RouteRule"/> setup and saves it to the <see cref="RouteTable"/> of the <see cref="SimuServer"/>.
     /// </summary>
