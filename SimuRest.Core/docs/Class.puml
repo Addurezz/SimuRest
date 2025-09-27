@@ -27,31 +27,6 @@ package "Runtime" {
         + SimuResponse(status: int, body: string)
     }
     
-    class Router {
-        + Table: RouteTable
-    
-        + Handle(request: SimuRequest): SimuResponse
-    }
-    
-    class RouteTable {
-        + Routes: List<RouteRule>
-        
-        + Match(request: SimuRequest): RouteRule
-    }
-    
-    class Route {
-        + Method: HttpMethod
-        + Path: string
-        
-        + Route(method: HttpMethod, path: string)
-    }
-    
-    class RouteRule {
-        + Route: Route
-        + Handler: func<SimuRequest, SimuResponse>
-    }
-    
-    
     class RequestHandler {
         - _router: Router
         - _writer: ResponseWriter
@@ -86,6 +61,32 @@ package "Runtime" {
    
 }
 
+package RoutingSystem {
+    class Router {
+        + Table: RouteTable
+    
+        + Handle(request: SimuRequest): SimuResponse
+    }
+    
+    class RouteTable {
+        + Routes: List<RouteRule>
+        
+        + Match(request: SimuRequest): RouteRule
+    }
+    
+    class Route {
+        + Method: HttpMethod
+        + Path: string
+        
+        + Route(method: HttpMethod, path: string)
+    }
+    
+    class RouteRule {
+        + Route: Route
+        + Handler: func<SimuRequest, SimuResponse>
+    }
+}
+
 package "Builder API" {
     class SimuServerBuilder {
         + Server: SimuServer
@@ -103,10 +104,12 @@ package "Builder API" {
 
 SimuServer --* SimuServerBuilder
 RouteRuleBuilder *-- SimuServerBuilder
+SimuServer *-- ServerMemory
 
 RouteRuleBuilder *-- RouteRule
 RouteRule *-- Route
 
+RequestHandler --> ServerMemory
 RequestHandler *-- Router
 Router *-- RouteTable
 RequestHandler *-- ResponseWriter

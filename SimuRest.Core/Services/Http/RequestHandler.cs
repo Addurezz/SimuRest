@@ -23,6 +23,7 @@ public class RequestHandler
     /// <param name="router">The <see cref="Router"/> to match routes.</param>
     /// <param name="parser">the <see cref="Parser"/> to parse <see cref="SimuRequest"/>.</param>
     /// <param name="writer">The <see cref="ResponseWriter"/> to write to the response file stream.</param>
+    /// <param name="memory">The <see cref="ServerMemory"/> to save and retrieve response data from.</param>
     public RequestHandler(Router router, Parser parser, ResponseWriter writer, ServerMemory memory)
     {
         _memory = memory;
