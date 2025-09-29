@@ -14,41 +14,21 @@ public class SimuServer
     /// Gets the configured <see cref="RequestHandler"/>.
     /// </summary>
     public RequestHandler Handler { get; }
-
-    /// <summary>
-    /// Gets the configured <see cref="Router"/>.
-    /// </summary>
+    
     public Router Router { get; }
-
-    /// <summary>
-    /// Gets the configured <see cref="ResponseWriter"/>.
-    /// </summary>
-    public ResponseWriter Writer { get; }
-
-    /// <summary>
-    /// Gets the configured <see cref="Parser"/>.
-    /// </summary>
-    public Parser Parser { get; }
+    
+    public RouteTable RouteTable { get; }
 
     /// <summary>
     /// Gets the <see cref="HttpListener"/>.
     /// </summary>
-    public HttpListener Listener;
+    public HttpListener Listener { get; }
 
+    /// <summary>
+    /// Gets the <see cref="ServerMemory"/> that stores the data.
+    /// </summary>
     public ServerMemory Memory { get; }
     
-    // the lock for editing '_activeRequests' in multi-threading
-    private readonly object _tasksLock = new();
-    
-    // list of all currently active requests
-    private List<Task> _activeRequests = new List<Task>();
-    
-    // the user port the server listens to
-    private int _port = 5000;
-    
-    // the token to cancel the listening for requests and stopping the server
-    private CancellationTokenSource _cts = new();
-
     /// <summary>
     /// Sets the port the server is listening to. 
     /// </summary>
@@ -64,22 +44,28 @@ public class SimuServer
             _port = value;
         }
     }
+    
+    // the lock for editing '_activeRequests' in multi-threading
+    private readonly object _tasksLock = new();
+    
+    
+    // list of all currently active requests
+    private readonly List<Task> _activeRequests = new List<Task>();
+    
+    // the user port the server listens to
+    private int _port = 5000;
+    
+    // the token to cancel the listening for requests and stopping the server
+    private CancellationTokenSource _cts = new();
 
-    /// <summary>
-    /// Initializes a new instance of a <see cref="SimuServer"/>.
-    /// </summary>
-    /// <param name="router">The <see cref="Router"/> that matches with <see cref="RouteTable"/> for <see cref="SimuRequest"/>.</param>
-    /// <param name="writer">The <see cref="ResponseWriter"/> that writes a specified file stream to the <see cref="HttpListenerResponse"/>.</param>
-    /// <param name="parser">The <see cref="Parser"/> that translates incoming requests into <see cref="SimuRequest"/>.</param>
-    /// <param name="memory">The <see cref="ServerMemory"/> that allows in memory saving and retrieval.</param>
-    public SimuServer(Router router, ResponseWriter writer, Parser parser, ServerMemory memory)
+    
+    public SimuServer(ServerMemory memory, RouteTable table)
     {
-        Parser = parser;
-        Router = router;
-        Writer = writer;
-        Memory = memory;
-        Handler = new RequestHandler(Router, Parser, Writer, Memory);
+        Router = new Router(table);
+        RouteTable = table;
         Listener = new HttpListener();
+        Memory = memory;
+        Handler = new RequestHandler(Router, Memory);
     }
 
     /// <summary>
@@ -87,13 +73,13 @@ public class SimuServer
     /// </summary>
     public async Task Start()
     {
-        // Setup the listener
-        Listener.Start();
+        // Set up the listener
         Listener.Prefixes.Add($"http://localhost:{_port}/");
+        Listener.Start();
 
         HttpListenerContext context;
         
-        // Accept incoming requests and handle them as long as the token doesnt cancel the inflow
+        // Accept incoming requests and handle them as long as the token doesn't cancel the inflow
         while (Listener.IsListening && !_cts.IsCancellationRequested)
         {
             try

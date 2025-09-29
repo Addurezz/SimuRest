@@ -6,7 +6,14 @@ namespace SimuRest.Core.Models;
 /// </summary>
 public class Route
 {
+    /// <summary>
+    /// Gets the <see cref="HttpMethod"/>.
+    /// </summary>
     public HttpMethod Method { get; }
+    
+    /// <summary>
+    /// Gets the path.
+    /// </summary>
     public string Path { get; }
     
     /// <summary>

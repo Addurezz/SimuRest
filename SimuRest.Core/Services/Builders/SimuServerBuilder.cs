@@ -12,9 +12,9 @@ public class SimuServerBuilder
     /// <summary>
     /// Gets or Sets the <see cref="SimuServer"/>.
     /// </summary>
-    public SimuServer Server { get; set; }
-    
-    public ServerMemory Memory { get; }
+    public SimuServer Server { get; }
+
+    public ServerMemory Memory => Server.Memory;
     
     /// <summary>
     /// Initializes a new instance of a <see cref="SimuServerBuilder"/> with a given <see cref="SimuServer"/>.
@@ -30,12 +30,7 @@ public class SimuServerBuilder
     /// </summary>
     public SimuServerBuilder()
     {
-        ServerMemory m = new ServerMemory();
-        Memory = m;
-        Router r = new Router();
-        ResponseWriter w = new ResponseWriter();
-        Parser p = new Parser();
-        Server = new SimuServer(r, w, p, m);
+        Server = new SimuServer(new ServerMemory(), new RouteTable());
     }
 
     /// <summary>
@@ -46,7 +41,7 @@ public class SimuServerBuilder
     /// <returns>A <see cref="RouteRuleBuilder"/> to setup the <see cref="RouteRule"/>.</returns>
     public RouteRuleBuilder Setup(HttpMethod method, string path)
     {   
-        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path), Memory);
+        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path));
         return routeRuleBuilder;
     }
 

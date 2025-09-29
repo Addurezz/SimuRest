@@ -21,15 +21,14 @@ public class RequestHandler
     /// Initializes a new instance of the <see cref="RequestHandler"/>.
     /// </summary>
     /// <param name="router">The <see cref="Router"/> to match routes.</param>
-    /// <param name="parser">the <see cref="Parser"/> to parse <see cref="SimuRequest"/>.</param>
-    /// <param name="writer">The <see cref="ResponseWriter"/> to write to the response file stream.</param>
     /// <param name="memory">The <see cref="ServerMemory"/> to save and retrieve response data from.</param>
-    public RequestHandler(Router router, Parser parser, ResponseWriter writer, ServerMemory memory)
+    public RequestHandler(Router router, ServerMemory memory)
     {
         _memory = memory;
-        _writer = writer;
         _router = router;
-        _parser = parser;
+        
+        _writer = new ResponseWriter();
+        _parser = new Parser();
     }
 
     /// <summary>
@@ -38,11 +37,18 @@ public class RequestHandler
     /// <param name="ctx">The <see cref="HttpListenerContext"/> to process.</param>
     public async Task Handle(HttpListenerContext ctx)
     {
-        HttpContextAdapter adapter = new HttpContextAdapter(ctx);
-        SimuRequest? req = GetSimuRequestFromContext(adapter);
-        SimuResponse response = await GetSimuResponse(req);
-        
-        await WriteToStream(adapter, response);
+        try
+        {
+            HttpContextAdapter adapter = new HttpContextAdapter(ctx);
+            SimuRequest? req = GetSimuRequestFromContext(adapter);
+            SimuResponse response = await GetSimuResponse(req);
+            await WriteToStream(adapter, response);
+        }
+        catch (Exception e)
+        {
+            await WriteToStream(new HttpContextAdapter(ctx),
+                new SimuResponse(500, $"Internal server error: {e.Message}"));
+        }
     }
     
     /// <summary>

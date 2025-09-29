@@ -10,7 +10,18 @@ public class Router
     /// <summary>
     /// Gets or Sets the <see cref="RouteTable"/>.
     /// </summary>
-    public RouteTable Table { get; set; } = new();
+    public RouteTable Table { get; }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="Router"/>.
+    /// </summary>
+    /// <param name="table">The <see cref="RouteTable"/> to save the <see cref="Route"/>.</param>
+    public Router(RouteTable table)
+    {
+        Table = table;
+    }
+    
+    
     
     /// <summary>
     /// Process specified <see cref="SimuRequest"/> as asynchronous operation.

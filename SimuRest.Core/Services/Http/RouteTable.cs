@@ -9,7 +9,7 @@ public class RouteTable
     /// <summary>
     /// Stores the <see cref="RouteRule"/> with (<see cref="HttpMethod"/>, <see cref="String"/>) as key.
     /// </summary>
-    public Dictionary<(HttpMethod, string), RouteRule> Routes { get; set; } = new();
+    public Dictionary<(HttpMethod, string), RouteRule> Routes { get; } = new();
 
     
     /// <summary>
@@ -40,7 +40,7 @@ public class RouteTable
 
         (HttpMethod, string) key = (rule.Route.Method, rule.Route.Path);
         Console.WriteLine($"Inserting route: {rule.Route.Method} {rule.Route.Path}");
-        
-        if (!Routes.TryAdd(key, rule)) ;
+
+        Routes.TryAdd(key, rule);
     }
 }

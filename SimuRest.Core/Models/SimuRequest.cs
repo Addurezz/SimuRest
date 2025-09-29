@@ -16,6 +16,9 @@ public class SimuRequest
     /// </summary>
     public HttpMethod Method { get; }
     
+    /// <summary>
+    /// Gets the content of the request.
+    /// </summary>
     public string Body { get; set; }
 
     /// <summary>

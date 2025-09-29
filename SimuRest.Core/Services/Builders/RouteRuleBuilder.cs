@@ -9,6 +9,7 @@ namespace SimuRest.Core.Services.Builders;
 /// </summary>
 public class RouteRuleBuilder
 {
+    private readonly Router _router;
     private readonly SimuServerBuilder _serverBuilder;
     private readonly RouteRule? _rule;
     private readonly RouteTable _routeTable;
@@ -19,12 +20,13 @@ public class RouteRuleBuilder
     /// </summary>
     /// <param name="serverBuilder">The <see cref="SimuServerBuilder"/> that requested the <see cref="RouteRuleBuilder"/>.</param>
     /// <param name="route">The <see cref="Route"/> to build the <see cref="RouteRule"/> from.</param>
-    public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route, ServerMemory memory)
+    public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route)
     {
-        _memory = memory;
+        _router = new Router(serverBuilder.Server.RouteTable);
+        _routeTable = _router.Table;
         _serverBuilder = serverBuilder;
-        _routeTable = serverBuilder.Server.Router.Table;
         _rule = new RouteRule(route, null);
+        _memory = serverBuilder.Memory;
     }
 
     /// <summary>
@@ -66,8 +68,16 @@ public class RouteRuleBuilder
 
         _rule.Handler = req =>
         {
-            _memory.Save(req.Path, req.Body);
-            return new SimuResponse(200, "Saved");
+            try
+            {
+                _memory.Save(req.Path, req.Body);
+                return new SimuResponse(200, "Saved");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new SimuResponse(401, "Not saved");
+            }
         };
 
         return this;
@@ -79,11 +89,19 @@ public class RouteRuleBuilder
 
         _rule.Handler = req =>
         {
-            var data = _memory.Get(req.Path);
-            if (data is string s)
-                return new SimuResponse(200, s);
+            try
+            {
+                var data = _memory.Get(req.Path);
+                if (data is string s)
+                    return new SimuResponse(200, s);
 
-            return SimuResponse.NotFound;
+                return SimuResponse.NotFound;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return new SimuResponse(402, "Something went wrong regarding the server response.");
+            }
         };
  
         return this;
