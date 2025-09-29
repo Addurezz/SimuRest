@@ -6,22 +6,11 @@ namespace SimuRest.Core.Services.Http;
 /// Represents a Router for the <see cref="SimuServer"/>. Provides access to route matching with <see cref="RouteTable"/>.
 /// </summary>
 public class Router
-{   
+{
     /// <summary>
     /// Gets or Sets the <see cref="RouteTable"/>.
     /// </summary>
-    public RouteTable Table { get; }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="Router"/>.
-    /// </summary>
-    /// <param name="table">The <see cref="RouteTable"/> to save the <see cref="Route"/>.</param>
-    public Router(RouteTable table)
-    {
-        Table = table;
-    }
-    
-    
+    private RouteTable Table { get; } = new RouteTable();
     
     /// <summary>
     /// Process specified <see cref="SimuRequest"/> as asynchronous operation.
@@ -44,4 +33,14 @@ public class Router
             return SimuResponse.NotFound;
         }
     }
+    
+    /// <summary>
+    /// Saves a <see cref="RouteRule"/>. 
+    /// </summary>
+    /// <param name="rule">The <see cref="RouteRule"/> to be saved.</param>
+    public void InsertRouteRule(RouteRule rule)
+    {
+        Table.Insert(rule);
+    }
+    
 }

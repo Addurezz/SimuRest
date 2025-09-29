@@ -9,24 +9,21 @@ namespace SimuRest.Core.Services.Builders;
 /// </summary>
 public class RouteRuleBuilder
 {
-    private readonly Router _router;
     private readonly SimuServerBuilder _serverBuilder;
-    private readonly RouteRule? _rule;
-    private readonly RouteTable _routeTable;
-    private readonly ServerMemory _memory;
+    private readonly ServiceProvider _provider;
+    private readonly RouteRule _rule;
 
     /// <summary>
     /// Initializes a new instance of a <see cref="RouteRuleBuilder"/>.
     /// </summary>
     /// <param name="serverBuilder">The <see cref="SimuServerBuilder"/> that requested the <see cref="RouteRuleBuilder"/>.</param>
     /// <param name="route">The <see cref="Route"/> to build the <see cref="RouteRule"/> from.</param>
-    public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route)
+    /// <param name="provider">The <see cref="ServiceProvider"/> that stores the services needed.</param>
+    public RouteRuleBuilder(SimuServerBuilder serverBuilder, Route route, ServiceProvider provider)
     {
-        _router = new Router(serverBuilder.Server.RouteTable);
-        _routeTable = _router.Table;
+        _provider = provider;
         _serverBuilder = serverBuilder;
         _rule = new RouteRule(route, null);
-        _memory = serverBuilder.Memory;
     }
 
     /// <summary>
@@ -66,11 +63,13 @@ public class RouteRuleBuilder
     {
         if (_rule is null || _rule.Route.Method != HttpMethod.Post) throw new InvalidOperationException();
 
+        ServerMemory memory = _provider.GetService<ServerMemory>();
+        
         _rule.Handler = req =>
         {
             try
             {
-                _memory.Save(req.Path, req.Body);
+                memory.Save(req.Path, req.Body);
                 return new SimuResponse(200, "Saved");
             }
             catch (Exception e)
@@ -83,15 +82,22 @@ public class RouteRuleBuilder
         return this;
     }
 
+    /// <summary>
+    /// Configures the current <see cref="RouteRule"/> to respond to an incoming GET request from an in memory source.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public RouteRuleBuilder RespondFromMemory()
     {
-        if (_rule is null) throw new InvalidOperationException();
+        if (_rule is null || _rule.Route.Method != HttpMethod.Get) throw new InvalidOperationException();
+
+        ServerMemory memory = _provider.GetService<ServerMemory>();
 
         _rule.Handler = req =>
         {
             try
             {
-                var data = _memory.Get(req.Path);
+                var data = memory.Get(req.Path);
                 if (data is string s)
                     return new SimuResponse(200, s);
 
@@ -113,7 +119,8 @@ public class RouteRuleBuilder
     /// <returns>The <see cref="SimuServerBuilder"/>.</returns>
     public SimuServerBuilder Apply()
     {
-        _routeTable.Insert(_rule);
+        Router router = _provider.GetService<Router>();
+        router.InsertRouteRule(_rule);
         return _serverBuilder;
     }
 }

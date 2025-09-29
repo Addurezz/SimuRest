@@ -14,7 +14,7 @@ public class SimuServerBuilder
     /// </summary>
     public SimuServer Server { get; }
 
-    public ServerMemory Memory => Server.Memory;
+    public ServerMemory Memory => Server.ServiceProvider.GetService<ServerMemory>();
     
     /// <summary>
     /// Initializes a new instance of a <see cref="SimuServerBuilder"/> with a given <see cref="SimuServer"/>.
@@ -30,7 +30,13 @@ public class SimuServerBuilder
     /// </summary>
     public SimuServerBuilder()
     {
-        Server = new SimuServer(new ServerMemory(), new RouteTable());
+        ServiceProvider provider = new ServiceProvider();
+        provider.Register(new Router());
+        provider.Register(new ResponseWriter());
+        provider.Register(new Parser());
+        provider.Register(new ServerMemory());
+        
+        Server = new SimuServer(provider);
     }
 
     /// <summary>
@@ -41,7 +47,7 @@ public class SimuServerBuilder
     /// <returns>A <see cref="RouteRuleBuilder"/> to setup the <see cref="RouteRule"/>.</returns>
     public RouteRuleBuilder Setup(HttpMethod method, string path)
     {   
-        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path));
+        RouteRuleBuilder routeRuleBuilder = new RouteRuleBuilder(this, new Route(method, path), Server.ServiceProvider);
         return routeRuleBuilder;
     }
 

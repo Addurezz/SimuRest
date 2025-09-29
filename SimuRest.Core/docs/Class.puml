@@ -1,30 +1,27 @@
 @startuml
 'https://plantuml.com/class-diagram
-package Core.Services.Builder {
-    class RouteRuleBuilder {
-        - Router _router
-        - SimuServerBuilder _serverBuilder
-        - RouteRule _rule
-        - RouteTable _routeTable
-        - ServerMemory _memory
-    
-        + RouteRuleBuilder(serverBuilder: SimuServerBuilder, route: Route)
-        + Responds(handler: Func<SimuRequest, SimuResponse>): RouteRuleBuilder
-        + Delay(ms: int): RouteRuleBuilder
-        + SaveInMemory(): RouteRuleBuilder
-        + RespondFromMemory(): RouteRuleBuilder
-        + Apply(): SimuServerBuilder
-    }
-    
-    class SimuServerBuilder {
-        + Server: SimuServer
-        + Memory: ServerMemory
-        + SimuServerBuilder(server: SimuServer)
-        + SimuServerBuilder()
-        + Setup(method: HttpMethod, path: string): RouteRuleBuilder
-        + Port(port: int): SimuServerBuilder
-    }
+class RouteRuleBuilder {
+    - SimuServerBuilder _serverBuilder
+    - _provider : ServiceProvider
+    - _rule : RouteRule
+
+    + RouteRuleBuilder(serverBuilder: SimuServerBuilder, route: Route, provider : ServiceProvider)
+    + Responds(handler: Func<SimuRequest, SimuResponse>): RouteRuleBuilder
+    + Delay(ms: int): RouteRuleBuilder
+    + SaveInMemory(): RouteRuleBuilder
+    + RespondFromMemory(): RouteRuleBuilder
+    + Apply(): SimuServerBuilder
 }
+
+class SimuServerBuilder {
+    + Server: SimuServer
+    + Memory: ServerMemory
+    + SimuServerBuilder(server: SimuServer)
+    + SimuServerBuilder()
+    + Setup(method: HttpMethod, path: string): RouteRuleBuilder
+    + Port(port: int): SimuServerBuilder
+}
+
 
 interface IHttpContext {
     + Context : IHttpListenerContext
@@ -43,115 +40,112 @@ class ServerMemory {
     + Get(path : string) : object?
 }
 
-package Core.Models {
-    class SimuRequest {
-        + Path : string
-        + Method : HttpMethod
-        + Body : string
-        + SimuRequest(method : HttpMethod, path : string, body : string)
-    }
-    
-    class SimuResponse {
-        + StatusCode : int
-        + Body : string
-        + NotFound : SimuResponse <<static>>
-        + BadRequest : SimuResponse <<static>>
-        + SimuResponse(status : int, body : string)
-    }
-    
-    class Route {
-        + Method : HttpMethod
-        + Path : string
-        + Route(method : HttpMethod, path : string)
-    }
-    
-    class RouteRule {
-        + Route : Route
-        + Handler : Func<SimuRequest, SimuResponse>?
-        + Delay : int
-        + RouteRule(route : Route, handler : Func<SimuRequest, SimuResponse>?
-        + Execute(request : SimuRequest) : Task<SimuResponse>
-    }
+class SimuServer {
+    + Handler : RequestHandler
+    + Listener : HttpListener
+    + ServiceProvider : ServiceProvider
+    + Port : int
+    - _tasksLock : Object
+    - _activeRequests : List<Task>
+    - _cts : CancellationTokenSource
+
+    + SimuServer(provider : ServiceProvider)
+    + Start() : Task
+    + Stop() : Task
 }
 
-package Core.Services {
-    class SimuServer {
-        + Handler : RequestHandler
-        + Router : Router
-        + RouteTable : RouteTable
-        + Listener : HttpListener
-        + Memory : ServerMemory
-        + Port : int
-        - _tasksLock : Object
-        - _activeRequests : List<Task>
-        - _cts : CancellationTokenSource
-        
-        + SimuServer(memory : ServerMemory, table : RouteTable)
-        + Start() : Task
-        + Stop() : Task
-    }
-    
-    class RequestHandler {
-        - ResponseWriter _writer
-        - Router _router
-        - Parser _parser
-        - ServerMemory _memory
-    
-        + RequestHandler(router: Router, memory: ServerMemory)
-        + Handle(ctx: HttpListenerContext) : Task
-        + GetSimuRequestFromContext(ctx: IHttpContext) : SimuRequest
-        + GetSimuResponse(req: SimuRequest) : Task<SimuResponse>
-        + WriteToStream(ctx: IHttpContext, response: SimuResponse) : Task
-    }
-    
-    class RouteTable {
-        + {field} Routes : Dictionary<(HttpMethod, string), RouteRule>
-        + Match(request : SimuRequest) : RouteRule
-        + Insert(rule : RouteRule) : void
-    }
-    
-    class Router {
-        + Table : RouteTable
-        + Router(table : RouteTable)
-        + Handle(request : SimuRequest) : Task<SimuResponse>
-    }
-    
-    class ResponseWriter {
-        + Write(ctx : IHttpContext, response : SimuResponse) : void
-    }
-    
-    class Parser {
-        + Parse(ctx : IHttpContext) : SimuRequest?
-    }
-    
+class RequestHandler {
+    + Handle(ctx: HttpListenerContext, provider : ServiceProvider) : Task
+    - GetSimuRequestFromContext(provider : ServiceProvider, ctx: IHttpContext) : SimuRequest
+    - GetSimuResponse(provider : ServiceProvider, req: SimuRequest) : Task<SimuResponse>
+    - WriteToStream(provider : ServiceProvider, ctx: IHttpContext, response: SimuResponse) : Task
 }
 
+class Router {
+    - Table : RouteTable
+    + Handle(request : SimuRequest) : Task<SimuResponse>
+    + InsertRouteRule(rule : RouteRule) : void
+}
 
+class RouteTable {
+    + {field} Routes : Dictionary<(HttpMethod, string), RouteRule>
+    + Match(request : SimuRequest) : RouteRule
+    + Insert(rule : RouteRule) : void
+}
+
+class Route {
+    + Method : HttpMethod
+    + Path : string
+    + Route(method : HttpMethod, path : string)
+}
+
+class RouteRule {
+    + Route : Route
+    + Handler : Func<SimuRequest, SimuResponse>?
+    + Delay : int
+    + RouteRule(route : Route, handler : Func<SimuRequest, SimuResponse>?
+    + Execute(request : SimuRequest) : Task<SimuResponse>
+}
+
+class MessagingHandler {}
+
+class ResponseWriter {
+    + Write(ctx : IHttpContext, response : SimuResponse) : void
+}
+
+class Parser {
+    + Parse(ctx : IHttpContext) : SimuRequest?
+}   
+
+
+class ServiceProvider {
+    - {field}_services : Dictionary<Type, object>
+    + Register<T>(T : object) : void
+    + GetService<T>() : T
+}
+
+class SimuRequest {
+    + Path : string
+    + Method : HttpMethod
+    + Body : string
+    + SimuRequest(method : HttpMethod, path : string, body : string)
+}
+
+class SimuResponse {
+    + StatusCode : int
+    + Body : string
+    + NotFound : SimuResponse <<static>>
+    + BadRequest : SimuResponse <<static>>
+    + SimuResponse(status : int, body : string)
+}
+
+SimuServer *-- ServiceProvider
 SimuServer *-- RequestHandler
-SimuServer *-- Router
-SimuServer *-- RouteTable
-SimuServer *-- ServerMemory
-SimuServer --> HttpListener
+SimuServer *-- HttpListener
 
-RequestHandler --> ResponseWriter
+RequestHandler -u-> ServiceProvider
 RequestHandler --> Router
+RequestHandler --> ResponseWriter
 RequestHandler --> Parser
-RequestHandler --> ServerMemory
-
 Router *-- RouteTable
-RouteTable *-- RouteRule
+
+RouteTable --> RouteRule
+
 RouteRule *-- Route
 
+IHttpContext <|.. HttpContextAdapter
 
-HttpContextAdapter ..|> IHttpContext
+Router --> SimuRequest
+Router --> SimuResponse
 
-RouteRuleBuilder --> RouteRule
-RouteRuleBuilder --> RouteTable
-RouteRuleBuilder *-- SimuServerBuilder
-RouteRuleBuilder --> ServerMemory
+ResponseWriter --> SimuResponse
+
+Parser --> SimuRequest
+Parser --> IHttpContext
 
 SimuServerBuilder *-- SimuServer
 
-
+RouteRuleBuilder *-l- SimuServerBuilder
+RouteRuleBuilder --> ServerMemory
 
 @enduml

@@ -11,23 +11,19 @@ namespace SimuRest.Core.Services.Http;
 public class SimuServer
 {
     /// <summary>
-    /// Gets the configured <see cref="RequestHandler"/>.
+    /// Gets the <see cref="ServiceProvider"/>.
     /// </summary>
-    public RequestHandler Handler { get; }
+    public ServiceProvider ServiceProvider { get; }
     
-    public Router Router { get; }
-    
-    public RouteTable RouteTable { get; }
-
     /// <summary>
     /// Gets the <see cref="HttpListener"/>.
     /// </summary>
     public HttpListener Listener { get; }
-
+    
     /// <summary>
-    /// Gets the <see cref="ServerMemory"/> that stores the data.
+    /// Gets the <see cref="RequestHandler"/>.
     /// </summary>
-    public ServerMemory Memory { get; }
+    public RequestHandler Handler { get; }
     
     /// <summary>
     /// Sets the port the server is listening to. 
@@ -48,7 +44,6 @@ public class SimuServer
     // the lock for editing '_activeRequests' in multi-threading
     private readonly object _tasksLock = new();
     
-    
     // list of all currently active requests
     private readonly List<Task> _activeRequests = new List<Task>();
     
@@ -58,14 +53,15 @@ public class SimuServer
     // the token to cancel the listening for requests and stopping the server
     private CancellationTokenSource _cts = new();
 
-    
-    public SimuServer(ServerMemory memory, RouteTable table)
+    /// <summary>
+    /// Initializes a new instance of a <see cref="SimuServer"/>.
+    /// </summary>
+    /// <param name="provider">The <see cref="ServiceProvider"/> that stores the services.</param>
+    public SimuServer(ServiceProvider provider)
     {
-        Router = new Router(table);
-        RouteTable = table;
+        Handler = new RequestHandler();
         Listener = new HttpListener();
-        Memory = memory;
-        Handler = new RequestHandler(Router, Memory);
+        ServiceProvider = provider;
     }
 
     /// <summary>
@@ -93,7 +89,7 @@ public class SimuServer
             }
             
             // Handle the user request on a different thread
-            Task requestTask = Handler.Handle(context);
+            Task requestTask = Handler.Handle(context, ServiceProvider);
             
             // Add the current request to keep track of active requests
             lock(_tasksLock)
